@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: flagship-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-flagship}
+      POSTGRES_USER: ${POSTGRES_USER:-flagship}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-flagship_dev_pass}
+    ports:
+      - "5432:5432"
+    volumes:
+      - flagship_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-flagship} -d ${POSTGRES_DB:-flagship}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+
+  flagship-server:
+    build:
+      context: .
+      dockerfile: flagship-server/Dockerfile
+    container_name: flagship-server
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-flagship}
+      POSTGRES_USER: ${POSTGRES_USER:-flagship}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-flagship_dev_pass}
+      FLAGSHIP_JWT_SECRET: ${FLAGSHIP_JWT_SECRET:-change-me-32-character-jwt-secret-key}
+    ports:
+      - "8080:8080"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/actuator/health/readiness || exit 1"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    deploy:
+      resources:
+        limits:
+          memory: 768M
+
+  flagship-frontend:
+    build:
+      context: .
+      dockerfile: flagship-frontend/Dockerfile
+    container_name: flagship-frontend
+    depends_on:
+      flagship-server:
+        condition: service_healthy
+    ports:
+      - "3000:80"
+    deploy:
+      resources:
+        limits:
+          memory: 256M
+
+volumes:
+  flagship_pg_data:

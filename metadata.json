@@ -1,0 +1,8 @@
+{
+  "name": "Remix FlagShip",
+  "description": "Self-hosted feature flag, targeting, gradual rollout, and experiment analytics platform with a Spring Boot Starter.",
+  "requestFramePermissions": [],
+  "majorCapabilities": [
+    "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
+  ]
+}

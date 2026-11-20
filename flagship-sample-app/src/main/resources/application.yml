@@ -1,0 +1,14 @@
+server:
+  port: 8081
+
+flagship:
+  server-url: http://localhost:3000
+  sdk-key: fs_prod_core_commerce_001
+  app-name: sample-storefront-app
+  startup-timeout-ms: 1500
+  snapshot-file: ./data/sample-flagship-snapshot.json
+  sse-enabled: true
+  polling-fallback-interval-ms: 15000
+  defaults:
+    new-dashboard: false
+    new-checkout: false
